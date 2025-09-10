@@ -1,3 +1,7 @@
+from ingest import pgvector_store
+from dotenv import load_dotenv
+from langchain.prompts import PromptTemplate
+
 PROMPT_TEMPLATE = """
 CONTEXTO:
 {contexto}
@@ -8,6 +12,8 @@ REGRAS:
   "Não tenho informações necessárias para responder sua pergunta."
 - Nunca invente ou use conhecimento externo.
 - Nunca produza opiniões ou interpretações além do que está escrito.
+- Sempre que possível, responda em linguagem natural, de forma clara e completa,
+  e não apenas repetindo o texto do CONTEXTO.
 
 EXEMPLOS DE PERGUNTAS FORA DO CONTEXTO:
 Pergunta: "Qual é a capital da França?"
@@ -25,5 +31,16 @@ PERGUNTA DO USUÁRIO:
 RESPONDA A "PERGUNTA DO USUÁRIO"
 """
 
+load_dotenv()
+
 def search_prompt(question=None):
-    pass
+  docs = pgvector_store.similarity_search_with_score(question, k=10)
+
+  if not docs:
+      return "Não foram encontrados documentos relevantes para a pergunta."
+
+  contexto = "\n\n".join([doc.page_content.strip() for doc, _ in docs])
+
+  prompt = PromptTemplate.from_template(PROMPT_TEMPLATE).format(contexto=contexto, pergunta=question)
+
+  return prompt
