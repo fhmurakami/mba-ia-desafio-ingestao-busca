@@ -9,13 +9,14 @@ def main():
         print("Não foi possível iniciar o chat. Verifique os erros de inicialização.")
         return
 
-    user_input = input("PERGUNTA: ")
-    if user_input.lower() in {"sair", "exit", "quit"}:
-        print("Encerrando o chat. Até mais!")
-        return
+    while True:
+        user_input = input("PERGUNTA: ")
+        if user_input.lower() in {"sair", "exit", "quit"}:
+            print("Encerrando o chat. Até mais!")
+            break
 
-    response = chain.invoke(user_input)
-    print(f"RESPOSTA: {response.content}\n")
+        response = chain.invoke(user_input)
+        print(f"RESPOSTA: {response.content}\n")
 
 if __name__ == "__main__":
     try:
